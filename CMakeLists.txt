@@ -67,7 +67,7 @@ add_executable(demo
 	)
 
 add_dependencies(demo  
-	websockets
+	websockets_install
 	)
 target_link_libraries(demo PRIVATE
 	-Wl,--start-group  	

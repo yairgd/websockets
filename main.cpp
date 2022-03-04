@@ -18,7 +18,7 @@
 
 //g++  WebSockets.cpp -o WebSockets  -lwebsockets -lpthread -DDEMO
 #include "WebSockets.h"
-
+// https://libwebsockets.org/git/libwebsockets/tree/minimal-examples/ws-client/minimal-ws-client-ping/minimal-ws-client-ping.c?id=7c6e3a8aeb89f989ff4ccb4605736c38220789c5  ping/[poing + timer example
 int main(int argc, const char **argv)
 {
 	WebSockets ws;

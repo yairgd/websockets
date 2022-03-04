@@ -90,7 +90,9 @@ class WebSockets {
 				}
 
 			public:
-				time_t last_update_time;				
+				time_t last_update_time;
+				int idx;
+				char buffer[8092];
 			private:
 				std::string m_name;
 				std::string m_address;				
@@ -148,7 +150,7 @@ class WebSockets {
 				lws_service(context, 0);
 				time(&rx_time);				
 				for ( auto& [key, p] : Protocols ) {
-					if  (0 &&  (p.Connected() && p.getWsi() == 0)  || (p.last_update_time && rx_time-p.last_update_time>30)) {
+					if  ( (p.Connected() && p.getWsi() == 0) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
 						lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
 						p.Connect(context);
 						}

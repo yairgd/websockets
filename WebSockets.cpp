@@ -52,36 +52,54 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			p->setConnected(true);
 
 			break;
+		case LWS_CALLBACK_CLIENT_RECEIVE_PONG:
+			printf ("LWS_CALLBACK_CLIENT_RECEIVE_PONG");
+			break;
 		case LWS_CALLBACK_CLIENT_WRITEABLE: 
 			{
-				//	WebSockets * WebSockets  =  (WebSockets*)lws_get_protocol(wsi)->user;
+			//	WebSockets * WebSockets  =  (WebSockets*)lws_get_protocol(wsi)->user;
 
 			//	std::string msg = ws->getMsg();
-				char c[255];
-				c[0] = 0;
+			//	char c[255];
+			//	c[0] = 0;
 			//	strncpy (c, msg.c_str(),msg.size());
 			//	c[msg.size()] = 0;
-				n = lws_write(wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
-				// it is forbidden to uses directly with the pointer "(unsigned char*)userInfo->connection_string"
-				// from some reson the following function couses memory leak and destroy the connection string 
-				// I don't now why, maybe because the lws runs in c namespace and userInfo in c++ namespace 
-				//		n = lws_write(wsi, (const char*)cs ,strlen( cs )  ,  LWS_WRITE_TEXT);
-				//	n = lws_write(wsi, (unsigned char*) cs , strlen ( (const char*)cs)   ,  LWS_WRITE_TEXT);
-
+			//	n = lws_write(wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
+			
 				break;
 			}
 
 		case LWS_CALLBACK_CLIENT_RECEIVE:
 			time(&p->last_update_time);
+
+			if (lws_is_first_fragment(wsi) ) {
+				p->idx =0;
+
+			}
+
+			memcpy(  &p->buffer[  p->idx  ] , in, len);
+			p->idx +=len;
+			if ( lws_is_final_fragment(wsi)) {
+				p->buffer[p->idx] = 0;
+				std::cout<< p->buffer <<std::endl<<LWS_PRE<<std::endl;
+				bool res = true; //	(userInfo->connection)->ParseJson(  userInfo->buffer);
+				if (res == false) {
+					p->ClearWsi() ;
+					return -1;
+				}
+			} ;
+
+
+
 		//	printf("%s\n",in);
-			lwsl_user("RX: %s\n", (const char *)in);
+		//	lwsl_user("RX: %s\n", (const char *)in);
 		//	rx_seen++;
 		//	if (test && rx_seen == 10)
 		//		interrupted = 1;
 			break;
 
 		case LWS_CALLBACK_CLIENT_CLOSED:
-		//	p->ClearWsi();
+			p->ClearWsi();
 
 			break;
 
