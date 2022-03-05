@@ -66,21 +66,18 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			time(&p->last_update_time);
 
 			if (lws_is_first_fragment(wsi) ) {
-				p->idx =0;
+				p->ClearMsg();
 
 			}
 
-			memcpy(  &p->buffer[  p->idx  ] , in, len);
-			p->idx +=len;
-			if ( lws_is_final_fragment(wsi)) {
-				p->buffer[p->idx] = 0;
-				
+			p->MsgAppend((char*)in,len);
+			if (lws_is_final_fragment(wsi)) {	
 				bool res = p->CallBack(); 
 				if (res == false) {
 					p->ClearWsi() ;
 					return -1;
 				}
-			} ;
+			};
 			break;
 
 		case LWS_CALLBACK_CLIENT_CLOSED:

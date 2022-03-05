@@ -95,14 +95,19 @@ class WebSockets {
 
 				bool CallBack() {
 					if (m_callback)
-						return m_callback(buffer);
+						return m_callback(m_msg);
 					return true;
+				}
+
+				void ClearMsg() {
+					m_msg.clear();
+				}
+				void MsgAppend(char *in, int len) {
+					m_msg.append(in,len);
 				}
 
 			public:
 				time_t last_update_time;
-				int idx;
-				char buffer[8092];
 			private:
 				std::string m_name;
 				std::string m_address;				
@@ -114,6 +119,7 @@ class WebSockets {
 				bool m_connected = false;
 				char p_name[16];
 				std::function<bool (std::string json)>   m_callback;
+				std::string m_msg;
 				
 
 
