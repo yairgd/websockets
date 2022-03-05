@@ -12,8 +12,12 @@ include(ExternalProject)
 
 
 
-
 add_library(websockets INTERFACE)
+set_target_properties(websockets PROPERTIES
+	#INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/${3rd_part}/restbed/${CMAKE_BUILD_TYPE}/include
+	INTERFACE_LINK_DIRECTORIES ${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/lib/
+	INTERFACE_LINK_LIBRARIES libwebsockets.so
+	)
 find_package(websockets 
 	PATHS
 	"${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/usr/share")
@@ -71,7 +75,7 @@ add_dependencies(demo
 	)
 target_link_libraries(demo PRIVATE
 	-Wl,--start-group  	
-	"${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/lib/libwebsockets.so"
+	websockets
 	pthread
 	-Wl,--end-group
 	)
