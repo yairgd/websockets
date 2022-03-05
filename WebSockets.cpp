@@ -19,14 +19,8 @@
 #include <string>
 #include <string.h>
 //https://github.com/warmcat/libwebsockets/blob/main/minimal-examples-lowlevel/ws-client/minimal-ws-client-rx/libwebsockets.org.cer
-//static int interrupted, rx_seen, test;
-//static struct lws *client_wsi;
-//static  	unsigned char cs[256];
 
 
-
-
-//	static int
 int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			void *user, void *in, size_t len)
 {
@@ -58,7 +52,6 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 		case LWS_CALLBACK_CLIENT_WRITEABLE: 
 			{
 			//	WebSockets * WebSockets  =  (WebSockets*)lws_get_protocol(wsi)->user;
-
 			//	std::string msg = ws->getMsg();
 			//	char c[255];
 			//	c[0] = 0;
@@ -81,21 +74,13 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			p->idx +=len;
 			if ( lws_is_final_fragment(wsi)) {
 				p->buffer[p->idx] = 0;
-				std::cout<< p->buffer <<std::endl<<LWS_PRE<<std::endl;
-				bool res = true; //	(userInfo->connection)->ParseJson(  userInfo->buffer);
+				
+				bool res = p->CallBack(); 
 				if (res == false) {
 					p->ClearWsi() ;
 					return -1;
 				}
 			} ;
-
-
-
-		//	printf("%s\n",in);
-		//	lwsl_user("RX: %s\n", (const char *)in);
-		//	rx_seen++;
-		//	if (test && rx_seen == 10)
-		//		interrupted = 1;
 			break;
 
 		case LWS_CALLBACK_CLIENT_CLOSED:

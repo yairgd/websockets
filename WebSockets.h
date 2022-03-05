@@ -18,6 +18,7 @@
 
 #ifndef WEB_SOCKETS
 #define WEB_SOCKETS 
+#include <functional>
 #include <libwebsockets.h>
 #include <string>
 #include <signal.h>
@@ -54,7 +55,9 @@ class WebSockets {
 				~Protocol() {
 
 				}
-				void SetAddress(std::string address,std::string path, int port) {
+				void SetAddress(std::string address,std::string path, int port,
+						std::function<bool (std::string json)>   callback
+						) {
 					m_address = address;
 					m_path =path;
 					memset(&i, 0, sizeof i); /* otherwise uninitialized garbage */
@@ -66,6 +69,7 @@ class WebSockets {
 					i.ssl_connection = LCCSCF_USE_SSL;
 					i.protocol = p_name; 
 					i.pwsi = &client_wsi;
+					m_callback = callback;
 
 				}
 				void Connect(struct lws_context *context) {
@@ -89,6 +93,12 @@ class WebSockets {
 					return m_connected;
 				}
 
+				bool CallBack() {
+					if (m_callback)
+						return m_callback(buffer);
+					return true;
+				}
+
 			public:
 				time_t last_update_time;
 				int idx;
@@ -103,6 +113,7 @@ class WebSockets {
 				struct lws_client_connect_info i;
 				bool m_connected = false;
 				char p_name[16];
+				std::function<bool (std::string json)>   m_callback;
 				
 
 
@@ -132,11 +143,12 @@ class WebSockets {
 				p.Connect(context);
 			}
 		}
-		void AddProtocol(std::string name, std::string address,std::string path, int port) {
+		void AddProtocol(std::string name, std::string address,std::string path, int port,
+				 const std::function<bool (std::string json)>  & callback = {}) {
 			lws_protocols protocol;
 			Protocol * p = &Protocols[name];
 			*p =  Protocol(name, &protocols[idx++], p);
-			p->SetAddress(address,path,port);
+			p->SetAddress(address,path,port,callback);
 
 		}
 		Protocol &operator [] (std::string name) {

@@ -18,14 +18,22 @@
 
 //g++  WebSockets.cpp -o WebSockets  -lwebsockets -lpthread -DDEMO
 #include "WebSockets.h"
+#include <iostream>
+#include <string>
+
 // https://libwebsockets.org/git/libwebsockets/tree/minimal-examples/ws-client/minimal-ws-client-ping/minimal-ws-client-ping.c?id=7c6e3a8aeb89f989ff4ccb4605736c38220789c5  ping/[poing + timer example
 int main(int argc, const char **argv)
 {
+	auto func = [](std::string json) ->bool {
+		std::cout<<json<<std::endl;
+		return true;
+	};
+
 	WebSockets ws;
-		ws.AddProtocol("bitstamp","ws.bitstamp.net","/",443);				
-		ws.AddProtocol("binance","stream.binance.com","/ws",9443);	
-		ws.AddProtocol("binance2","stream.binance.com","/ws",9443);	
-		ws.AddProtocol("bitstamp2","ws.bitstamp.net","/",443);				
+		ws.AddProtocol("bitstamp","ws.bitstamp.net","/",443,func);				
+		ws.AddProtocol("binance","stream.binance.com","/ws",9443,func);	
+		ws.AddProtocol("binance2","stream.binance.com","/ws",9443,func);	
+		ws.AddProtocol("bitstamp2","ws.bitstamp.net","/",443,func);				
 
 		ws.Connect();
 
