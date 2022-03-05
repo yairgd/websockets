@@ -1,6 +1,6 @@
 # Websockets in c++
 
-This project is the implementation of WebSockets in c++ using lib WebSockets (lws). Refer  [here](https://yairgadelov.me/websockets-with-c-/) in my blog for more details.
+This project is the implementation of WebSockets in c++ using lib WebSockets - [lws](https://github.com/warmcat/libwebsockets.git). Refer  [here](https://yairgadelov.me/websockets-with-c-/) in my blog for more details.
 
 
 ## Download & install libwebsockets 
