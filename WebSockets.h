@@ -57,7 +57,7 @@ class WebSockets {
 				}
 				void SetAddress(std::string address,std::string path, int port,
 						std::function<bool (std::string json)>   callback
-						) {
+					       ) {
 					m_address = address;
 					m_path =path;
 					memset(&i, 0, sizeof i); /* otherwise uninitialized garbage */
@@ -77,17 +77,17 @@ class WebSockets {
 					client_wsi = lws_client_connect_via_info(&i);
 				}	
 				int Write(std::string msg) {
-						char c[255];
-						strncpy (c, msg.c_str(),msg.size());
-						c[msg.size()] =0;
-						int	n = lws_write(client_wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
-				//	msg[msg.size()] =0;
-				//	int	n = lws_write(client_wsi, (unsigned char*) &msg[0], msg.size()   ,  LWS_WRITE_TEXT);
+					char c[255];
+					strncpy (c, msg.c_str(),msg.size());
+					c[msg.size()] =0;
+					int	n = lws_write(client_wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
+					//	msg[msg.size()] =0;
+					//	int	n = lws_write(client_wsi, (unsigned char*) &msg[0], msg.size()   ,  LWS_WRITE_TEXT);
 					return n;
 				}
 				void setConnected(bool c) {
 					m_connected = c;
-//					std::cout<<c<<std::endl;
+					//					std::cout<<c<<std::endl;
 				}
 				bool Connected() {
 					return m_connected;
@@ -120,7 +120,7 @@ class WebSockets {
 				char p_name[16];
 				std::function<bool (std::string json)>   m_callback;
 				std::string m_msg;
-				
+
 
 
 
@@ -140,14 +140,20 @@ class WebSockets {
 			if (context)
 				lws_context_destroy(context);
 		}
-		void Connect() {
+		void Connect(std::function<void(void)>   callback) {
 			CreateContext();
 			if (!context)
 				throw WebSocketsException("cannot create context",-9);
 
 			for ( auto& [key, p] : Protocols ) {
 				p.Connect(context);
+
 			}
+			while (!Connected())   {
+				RunStep();
+				std::this_thread::yield();
+			}
+			callback();
 		}
 		void AddProtocol(std::string name, std::string address,std::string path, int port,
 				 const std::function<bool (std::string json)>  & callback = {}) {
@@ -160,21 +166,28 @@ class WebSockets {
 		Protocol &operator [] (std::string name) {
 			return Protocols[name];
 		}
+		void RunStep() {
+			time_t rx_time;
+
+			std::this_thread::yield();
+			lws_service(context, 0);
+			time(&rx_time);				
+			for ( auto& [key, p] : Protocols ) {
+				if  ( (p.Connected() && p.getWsi() == 0) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
+					lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
+					p.Connect(context);
+				}
+			}
+
+
+
+		}
+
 		void Run() {
 			time_t rx_time;
 
 			while (1) {
-				std::this_thread::yield();
-				lws_service(context, 0);
-				time(&rx_time);				
-				for ( auto& [key, p] : Protocols ) {
-					if  ( (p.Connected() && p.getWsi() == 0) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
-						lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
-						p.Connect(context);
-						}
-				}
-
-
+				RunStep();
 			}
 		}
 
