@@ -35,7 +35,7 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			lwsl_err("CLIENT_CONNECTION_ERROR: %s\n",
 				 in ? (char *)in : "(null)");
 			p  =  (WebSockets::Protocol*)lws_get_protocol(wsi)->user;
-		//	p->ClearWsi();
+		////	p->ClearWsi();
 			break;
 
 		case LWS_CALLBACK_CLIENT_ESTABLISHED:
@@ -74,15 +74,14 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			if (lws_is_final_fragment(wsi)) {	
 				bool res = p->CallBack(); 
 				if (res == false) {
-					p->ClearWsi() ;
+					//p->ClearWsi() ;
 					return -1;
 				}
 			};
 			break;
 
 		case LWS_CALLBACK_CLIENT_CLOSED:
-			lwsl_user("%s: close connection\n", __func__);
-			p->ClearWsi();
+			//p->ClearWsi();
 
 			break;
 
