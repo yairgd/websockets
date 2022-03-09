@@ -81,6 +81,7 @@ int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			break;
 
 		case LWS_CALLBACK_CLIENT_CLOSED:
+			lwsl_user("%s: close connection\n", __func__);
 			p->ClearWsi();
 
 			break;

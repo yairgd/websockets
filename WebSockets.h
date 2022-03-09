@@ -28,7 +28,8 @@
 #include <vector>
 #include <map>
 
-#include <iostream>
+
+//https://libwebsockets.org/git/libwebsockets/tree/minimal-examples/ws-client/minimal-ws-client-rx?id=654adaf82abd0c09e3aeaaac0d5442fa08617ebb
 typedef int  (*callback)(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len);
 int callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			    void *user, void *in, size_t len);
@@ -55,6 +56,9 @@ class WebSockets {
 				~Protocol() {
 
 				}
+				std::string Name() {
+					return m_name;
+				}
 				void SetAddress(std::string address,std::string path, int port,
 						std::function<bool (std::string json)>   callback
 					       ) {
@@ -77,17 +81,18 @@ class WebSockets {
 					client_wsi = lws_client_connect_via_info(&i);
 				}	
 				int Write(std::string msg) {
-					char c[255];
+					int n;
+					char c[8092];
 					strncpy (c, msg.c_str(),msg.size());
 					c[msg.size()] =0;
-					int	n = lws_write(client_wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
+					if (client_wsi)
+						n = lws_write(client_wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
 					//	msg[msg.size()] =0;
 					//	int	n = lws_write(client_wsi, (unsigned char*) &msg[0], msg.size()   ,  LWS_WRITE_TEXT);
 					return n;
 				}
 				void setConnected(bool c) {
 					m_connected = c;
-					//					std::cout<<c<<std::endl;
 				}
 				bool Connected() {
 					return m_connected;
@@ -173,9 +178,11 @@ class WebSockets {
 			lws_service(context, 0);
 			time(&rx_time);				
 			for ( auto& [key, p] : Protocols ) {
-				if  ( (p.Connected() && p.getWsi() == 0) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
-					lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
-					p.Connect(context);
+				if  ( (p.Connected() && p.getWsi()) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
+				//	lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
+				//	lwsl_user("%s: close connection: %s\n", __func__, p.Name().c_str());
+				//	p.ClearWsi();
+				//	p.Connect(context);
 				}
 			}
 
@@ -223,14 +230,14 @@ class WebSockets {
 			info.port = CONTEXT_PORT_NO_LISTEN; /* we do not run any server */
 			info.protocols = protocols.data();
 			info.timeout_secs = 10;
-			//	info.connect_timeout_secs = 30;
-#if defined(LWS_WITH_MBEDTLS) || defined(USE_WOLFSSL)
+			//info.connect_timeout_secs = 30;
+//#if defined(LWS_WITH_MBEDTLS) || defined(USE_WOLFSSL)
 			/*
 			 * OpenSSL uses the system trust store.  mbedTLS has to be told which
 			 * CA to trust explicitly.
 			 */
-			//	info.client_ssl_ca_filepath = "./libwebsockets.org.cer";
-#endif
+			info.client_ssl_ca_filepath = "./libwebsockets.org.cer";
+//#endif
 
 			/*
 			 * since we know this lws context is only ever going to be used with

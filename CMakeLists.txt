@@ -85,3 +85,43 @@ target_include_directories(demo PUBLIC
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
 	)
+
+
+
+
+
+
+
+set (fxopen_SRC
+	WebSockets.cpp
+	fxopen.cpp
+	)
+set (demo_H
+	WebSockets.cpp
+	)
+
+
+add_executable(fxopen 
+	${fxopen_SRC}
+	${fxopen_H}
+	)
+
+add_dependencies(fxopen  
+	websockets_install
+	)
+target_link_libraries(fxopen PRIVATE
+	-Wl,--start-group  	
+	websockets
+	pthread
+	ssl 
+	crypto 
+	uuid
+	jsoncpp
+	-Wl,--end-group
+	)
+
+target_include_directories(fxopen PUBLIC
+	${PROJECT_BINARY_DIR}/	
+	${CMAKE_SOURCE_DIR}
+	${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
+	)
