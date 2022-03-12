@@ -44,57 +44,55 @@ static inline bool is_base64(unsigned char c) {
 	return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
-	std::string ret;
-	int i = 0;
-	int j = 0;
-	unsigned char char_array_3[3];
-	unsigned char char_array_4[4];
-	while (in_len--) {
-		char_array_3[i++] =  *(bytes_to_encode++);
-		if (i == 3) {
-			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-			char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-			char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-			char_array_4[3] = char_array_3[2] & 0x3f;
-
-			for(i = 0; (i <4) ; i++)
-				ret += base64_chars[char_array_4[i]];
-			i = 0;
-		}
-	}
-
-	if (i)
-	{
-		for(j = i; j < 3; j++)
-			char_array_3[j] = '\0';
-
-		char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-		char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-		char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-		char_array_4[3] = char_array_3[2] & 0x3f;
-
-		for (j = 0; (j < i + 1); j++)
-			ret += base64_chars[char_array_4[j]];
-
-		while((i++ < 3))
-			ret += '=';
-
-	}
-
-	return ret;
-
-}
 
 
 int main(int argc, const char **argv)
 {
 	WebSockets ws;
-	std::string web_api_key = "<web-api-key-from-fxopen>";
-	std::string secret = "<secret-from-fxopen>";
-	std::string web_api_id = "<web-api-id-from-fxopen>";
+	std::string web_api_key = "<web_api_key>";
+	std::string secret = "<secret>";
+	std::string web_api_id = "<web_api_id>";
 
-	auto createSign = [](std::time_t timestamp, std::string web_api_id, std::string web_api_key, std::string api_secret)->std::string {
+	auto base64_encode = [] (unsigned char const* bytes_to_encode, unsigned int in_len)->std::string  {
+		std::string ret;
+		int i = 0;
+		int j = 0;
+		unsigned char char_array_3[3];
+		unsigned char char_array_4[4];
+		while (in_len--) {
+			char_array_3[i++] =  *(bytes_to_encode++);
+			if (i == 3) {
+				char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+				char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+				char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+				char_array_4[3] = char_array_3[2] & 0x3f;
+
+				for(i = 0; (i <4) ; i++)
+					ret += base64_chars[char_array_4[i]];
+				i = 0;
+			}
+		}
+		if (i)
+		{
+			for(j = i; j < 3; j++)
+				char_array_3[j] = '\0';
+
+			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+			char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+			char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+			char_array_4[3] = char_array_3[2] & 0x3f;
+
+			for (j = 0; (j < i + 1); j++)
+				ret += base64_chars[char_array_4[j]];
+
+			while((i++ < 3))
+				ret += '=';
+
+		}
+		return ret;
+	};
+
+	auto createSign = [base64_encode](std::time_t timestamp, std::string web_api_id, std::string web_api_key, std::string api_secret)->std::string {
 		//unsigned char* result;
 		unsigned int len = 2000;
 
@@ -102,23 +100,14 @@ int main(int argc, const char **argv)
 		data_to_sign.append(std::to_string(timestamp));
 		data_to_sign.append(web_api_id);
 		data_to_sign.append(web_api_key);
-
 		const unsigned char *sign_data =  HMAC(EVP_sha256(),(unsigned char*)&api_secret[0], api_secret.size(),(unsigned char*)&data_to_sign[0] ,data_to_sign.size(), NULL, NULL);
-
-
-
 		return 	base64_encode (sign_data,32);
-
-
-
 	};
 	auto func = [](std::string json) ->bool {
 
 		std::cout<<json<<std::endl;
 		return true;
 	};
-
-
 
 	auto runAfterConnection = [&ws,&createSign,&web_api_key,&secret,&web_api_id](void) ->void {
 		// find time stamp
@@ -132,7 +121,7 @@ int main(int argc, const char **argv)
 		memset (id,64,0);
 		uuid_generate(uuid);
 		uuid_unparse_lower(uuid, id);
-		
+
 		// sign the data
 		std::string sig = createSign(unix_timestamp_x_1000, web_api_id,web_api_key,secret);
 
@@ -160,8 +149,8 @@ int main(int argc, const char **argv)
 		ws["fxopen_feed"].Write(message.str());
 
 
+		ws["fxopen_feed"].Write("{\"Id\": \"A03DF33D-E520-483B-892F-73C671127BC2\",\"Request\": \"FeedSubscribe\",\"Params\": {\"Subscribe\": [{\"Symbol\": \"EURUSD\",\"BookDepth\": 3}, {\"Symbol\": \"USDJPY\",\"BookDepth\": 1}]}}");
 	};
-
 	ws.AddProtocol("fxopen_feed","marginalttlivewebapi.fxopen.net","/",3000,func);	
 
 
