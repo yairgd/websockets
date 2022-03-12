@@ -103,9 +103,9 @@ int main(int argc, const char **argv)
 		const unsigned char *sign_data =  HMAC(EVP_sha256(),(unsigned char*)&api_secret[0], api_secret.size(),(unsigned char*)&data_to_sign[0] ,data_to_sign.size(), NULL, NULL);
 		return 	base64_encode (sign_data,32);
 	};
-	auto func = [](std::string json) ->bool {
+	auto func = [](std::string json, std::string protocl_name) ->bool {
 
-		std::cout<<json<<std::endl;
+		std::cout<<protocl_name<<":   "<<json<<std::endl;
 		return true;
 	};
 

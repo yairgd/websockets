@@ -26,8 +26,8 @@ int main(int argc, const char **argv)
 {
 	WebSockets ws;
 
-	auto func = [](std::string json) ->bool {
-		std::cout<<json<<std::endl;
+	auto func = [](std::string json, std::string protol_name) ->bool {
+		std::cout<<protol_name<<":          "<<json<<std::endl;
 		return true;
 	};
 

@@ -27,6 +27,7 @@
 #include <time.h>
 #include <vector>
 #include <map>
+#include <uuid/uuid.h>
 
 #include <iostream>
 typedef int  (*callback)(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len);
@@ -56,7 +57,7 @@ class WebSockets {
 
 				}
 				void SetAddress(std::string address,std::string path, int port,
-						std::function<bool (std::string json)>   callback
+						std::function<bool (std::string json, std::string name)>   callback
 					       ) {
 					m_address = address;
 					m_path =path;
@@ -77,12 +78,18 @@ class WebSockets {
 					client_wsi = lws_client_connect_via_info(&i);
 				}	
 				int Write(const std::string & msg) {
-					m_out_msg = msg;
-					int	n = lws_write(client_wsi, (unsigned char*) &m_out_msg[0], m_out_msg.size()   ,  LWS_WRITE_TEXT);
+					char c[8092];
+					strncpy (c, msg.c_str(),msg.size());
+					c[msg.size()] =0;
+					int	n = lws_write(client_wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
+					//	msg[msg.size()] =0;
+					//	m_out_msg = msg;
+					//	int	n = lws_write(client_wsi, (unsigned char*) &m_out_msg[0], m_out_msg.size()   ,  LWS_WRITE_TEXT);
 					return n;
 				}
 				void setConnected(bool c) {
 					m_connected = c;
+					//					std::cout<<c<<std::endl;
 				}
 				bool Connected() {
 					return m_connected;
@@ -90,7 +97,7 @@ class WebSockets {
 
 				bool CallBack() {
 					if (m_callback)
-						return m_callback(m_msg);
+						return m_callback(m_msg, m_name);
 					return true;
 				}
 
@@ -100,6 +107,7 @@ class WebSockets {
 				void MsgAppend(char *in, int len) {
 					m_msg.append(in,len);
 				}
+
 
 			public:
 				time_t last_update_time;
@@ -113,7 +121,7 @@ class WebSockets {
 				struct lws_client_connect_info i;
 				bool m_connected = false;
 				char p_name[16];
-				std::function<bool (std::string json)>   m_callback;
+				std::function<bool (std::string json, std::string name)>   m_callback;
 				std::string m_msg;
 				std::string m_out_msg;
 
@@ -152,7 +160,7 @@ class WebSockets {
 			callback();
 		}
 		void AddProtocol(std::string name, std::string address,std::string path, int port,
-				 const std::function<bool (std::string json)>  & callback = {}) {
+				 const std::function<bool (std::string json, std::string name)>  & callback = {}) {
 			lws_protocols protocol;
 			Protocol * p = &Protocols[name];
 			*p =  Protocol(name, &protocols[idx++], p);
@@ -162,6 +170,22 @@ class WebSockets {
 		Protocol &operator [] (std::string name) {
 			return Protocols[name];
 		}
+		/**
+		 * Created  03/12/2022
+		 * @brief   generate unique id
+		 * @param   
+		 * @return  
+		 */
+		std::string GetId() {
+			uuid_t uuid;
+			char id[64];
+			memset (id,64,0);
+			uuid_generate(uuid);
+			uuid_unparse_lower(uuid, id);
+			std::string s(id);
+			return s;
+		}
+
 		void RunStep() {
 			time_t rx_time;
 
@@ -169,11 +193,11 @@ class WebSockets {
 			lws_service(context, 0);
 			time(&rx_time);				
 			for ( auto& [key, p] : Protocols ) {
-			//	if  ( (p.Connected() && p.getWsi()) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
-			//		lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
-			//		p.ClearWsi();
-			//		p.Connect(context);
-			//	}
+				//	if  ( (p.Connected() && p.getWsi()) /*  || (p.last_update_time && rx_time-p.last_update_time>300)*/) {
+				//		lws_close_reason(p.getWsi(), LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
+				//		p.ClearWsi();
+				//		p.Connect(context);
+				//	}
 			}
 
 
