@@ -23,7 +23,7 @@ add_executable(demo
 	${demo_SRC}
 	${demo_H}
 	)
-target_link_libraries(${TARGET} PRIVATE websockets)
+target_link_libraries(demo PRIVATE websockets)
 target_link_libraries(demo PRIVATE
 	-Wl,--start-group  	
 	websockets
@@ -40,7 +40,7 @@ add_executable(fxopen
 	${fxopen_SRC}
 	${fxopen_H}
 	)
-target_link_libraries(${TARGET} PRIVATE websockets)
+target_link_libraries(fxopen PRIVATE websockets)
 target_link_libraries(fxopen PRIVATE
 	-Wl,--start-group  	
 	websockets
@@ -54,7 +54,7 @@ target_link_libraries(fxopen PRIVATE
 
 
 add_library(WebSockets WebSockets.cpp WebSockets.h)
-target_link_libraries(${TARGET} PRIVATE websockets)
+target_link_libraries(WebSockets PRIVATE websockets)
 target_link_libraries(WebSockets PRIVATE
 	-Wl,--start-group  	
 	websockets
