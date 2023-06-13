@@ -86,8 +86,8 @@ target_link_libraries(demo PRIVATE
 
 target_include_directories(demo PUBLIC
 	${PROJECT_BINARY_DIR}/	
-	${CMAKE_SOURCE_DIR}
-	${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
 	)
 
 
@@ -105,18 +105,24 @@ set (demo_H
 	)
 
 
-add_executable(fxopen 
-	${fxopen_SRC}
-	${fxopen_H}
-	)
-
+	
 add_library(WebSockets WebSockets.cpp WebSockets.h)
+add_dependencies(WebSockets websockets_install)
 target_link_libraries(WebSockets PRIVATE
 	-Wl,--start-group  	
 	websockets
 	-Wl,--end-group
+)
+target_include_directories(WebSockets PUBLIC
+	${PROJECT_BINARY_DIR}/	
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
 	)
 
+add_executable(fxopen 
+	${fxopen_SRC}
+	${fxopen_H}
+	)
 add_dependencies(fxopen  
 	websockets_install
 	)
@@ -130,9 +136,8 @@ target_link_libraries(fxopen PRIVATE
 	jsoncpp
 	-Wl,--end-group
 	)
-
 target_include_directories(fxopen PUBLIC
 	${PROJECT_BINARY_DIR}/	
-	${CMAKE_SOURCE_DIR}
-	${CMAKE_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/${3rd_part}/websockets/${CMAKE_BUILD_TYPE}/include/
 	)
