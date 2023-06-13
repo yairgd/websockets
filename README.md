@@ -15,7 +15,7 @@ git submodule update --init --recursive
 And use this to build it:
 
 ```bash
-cd websockets &&  mkdir Debug && cmake -DCMAKE_BUILD_TYPE=Debug ..
+cd websockets &&  mkdir Debug && cd Debug && cmake -DCMAKE_BUILD_TYPE=Debug .. && make
 ```
 
 ## Add as a CMake dependency
