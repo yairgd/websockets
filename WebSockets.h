@@ -220,10 +220,14 @@ class WebSockets {
 
 		void Run() {
 			time_t rx_time;
-
-			while (1) {
+			isRunning = true;
+			while (isRunning) {
 				RunStep();
 			}
+		}
+
+		void Stop() {
+			isRunning = false;
 		}
 
 		bool Connected() {
@@ -301,7 +305,7 @@ class WebSockets {
 		std::vector<struct lws_protocols> protocols;
 		std::map<std::string,WebSockets::Protocol> Protocols;
 		int idx = 0;
-
+		bool isRunning = false;
 };
 
 
