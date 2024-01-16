@@ -61,7 +61,7 @@ class WebSockets {
 					       ) {
 					SetAddress(address, path, port, true, callback);
 				}
-				void SetAddress(std::string address,std::string path, int port, bool ssl_connection,
+				void SetAddress(std::string address,std::string path, int port, int ssl_connection,
 						std::function<bool (std::string json, std::string name)>   callback
 					       ) {
 					m_address = address;
@@ -174,7 +174,7 @@ class WebSockets {
 			*p =  Protocol(name, &protocols[idx++], p);
 			p->SetAddress(address,path,port,callback);
 		}
-		void AddProtocol(std::string name, std::string address,std::string path, int port, bool ssl_connection,
+		void AddProtocol(std::string name, std::string address,std::string path, int port, int ssl_connection,
 				 const std::function<bool (std::string json, std::string name)>  & callback = {}) {
 			lws_protocols protocol;
 			Protocol * p = &Protocols[name];
