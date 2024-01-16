@@ -59,6 +59,11 @@ class WebSockets {
 				void SetAddress(std::string address,std::string path, int port,
 						std::function<bool (std::string json, std::string name)>   callback
 					       ) {
+					SetAddress(address, path, port, true, callback);
+				}
+				void SetAddress(std::string address,std::string path, int port, int ssl_connection,
+						std::function<bool (std::string json, std::string name)>   callback
+					       ) {
 					m_address = address;
 					m_path =path;
 					memset(&i, 0, sizeof i); /* otherwise uninitialized garbage */
@@ -67,11 +72,10 @@ class WebSockets {
 					i.path = strdup(&m_path[0]);
 					i.host = i.address;
 					i.origin = i.address;
-					i.ssl_connection = LCCSCF_USE_SSL;
+					i.ssl_connection = ssl_connection;
 					i.protocol = p_name; 
 					i.pwsi = &client_wsi;
 					m_callback = callback;
-
 				}
 				void Connect(struct lws_context *context) {
 					i.context = context;					
@@ -81,11 +85,15 @@ class WebSockets {
 					char c[8092];
 					strncpy (c, msg.c_str(),msg.size());
 					c[msg.size()] =0;
-					int	n = lws_write(client_wsi, (unsigned char*) c, strlen(c)  ,  LWS_WRITE_TEXT);
-					//	msg[msg.size()] =0;
-					//	m_out_msg = msg;
-					//	int	n = lws_write(client_wsi, (unsigned char*) &m_out_msg[0], m_out_msg.size()   ,  LWS_WRITE_TEXT);
-					return n;
+					return lws_write(client_wsi, (unsigned char*) c, strlen(c), LWS_WRITE_TEXT);
+				}
+				int Write(unsigned char* msg, size_t msg_length) {
+					// why lws why
+					size_t buf_length = LWS_PRE + msg_length;
+					unsigned char buf[buf_length];
+					unsigned char* buf_msg_ptr = buf+LWS_PRE;
+					memcpy(buf_msg_ptr, msg, msg_length);
+					return lws_write(client_wsi, buf_msg_ptr, msg_length, LWS_WRITE_BINARY);
 				}
 				void setConnected(bool c) {
 					m_connected = c;
@@ -165,7 +173,13 @@ class WebSockets {
 			Protocol * p = &Protocols[name];
 			*p =  Protocol(name, &protocols[idx++], p);
 			p->SetAddress(address,path,port,callback);
-
+		}
+		void AddProtocol(std::string name, std::string address,std::string path, int port, int ssl_connection,
+				 const std::function<bool (std::string json, std::string name)>  & callback = {}) {
+			lws_protocols protocol;
+			Protocol * p = &Protocols[name];
+			*p =  Protocol(name, &protocols[idx++], p);
+			p->SetAddress(address,path,port,ssl_connection,callback);
 		}
 		Protocol &operator [] (std::string name) {
 			return Protocols[name];
@@ -206,10 +220,14 @@ class WebSockets {
 
 		void Run() {
 			time_t rx_time;
-
-			while (1) {
+			isRunning = true;
+			while (isRunning) {
 				RunStep();
 			}
+		}
+
+		void Stop() {
+			isRunning = false;
 		}
 
 		bool Connected() {
@@ -287,7 +305,7 @@ class WebSockets {
 		std::vector<struct lws_protocols> protocols;
 		std::map<std::string,WebSockets::Protocol> Protocols;
 		int idx = 0;
-
+		bool isRunning = false;
 };
 
 
