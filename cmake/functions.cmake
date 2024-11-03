@@ -38,14 +38,12 @@ endif (NOT CMAKE_BUILD_TYPE)
 
 set (CMAKE_USE_RELATIVE_PATHS True)
 
-
-
 ####### chnage build flags here #####################
 # https://stackoverflow.com/questions/43890117/enforce-32-bit-enums-with-gcc-linker/4670134  - regading to shor enums
-set (CMAKE_C_FLAGS_DEBUG "-O0 -U_FORTIFY_SOURCE -g -fno-short-enums")
-set (CMAKE_CXX_FLAGS_DEBUG "-O0 -U_FORTIFY_SOURCE -g -std=c++17")
-set (CMAKE_C_FLAGS_RELEASE "-O2 -g -fno-short-enums")
-set (CMAKE_CXX_FLAGS_RELEASE "-O2 -g -std=c++17")
+set (CMAKE_C_FLAGS_DEBUG "-O0 -U_FORTIFY_SOURCE -g -fno-short-enums -Wno-enum-int-mismatch")
+set (CMAKE_CXX_FLAGS_DEBUG "-O0 -U_FORTIFY_SOURCE -g -std=c++17 -Wno-enum-int-mismatch ")
+set (CMAKE_C_FLAGS_RELEASE "-O2 -g -fno-short-enums  -Wno-enum-int-mismatch")
+set (CMAKE_CXX_FLAGS_RELEASE "-O2 -g -std=c++17  -Wno-enum-int-mismatch")
 
 
 message("CMAKE_C_FLAGS_DEBUG is ${CMAKE_C_FLAGS_DEBUG}")

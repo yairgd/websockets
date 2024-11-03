@@ -8,6 +8,8 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/cmake/functions.cmake)
 
 add_subdirectory(libwebsockets)
 
+
+
 project(WebSockets)
 SET(CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING "" FORCE)
 
